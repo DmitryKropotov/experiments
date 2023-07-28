@@ -9,12 +9,12 @@ public class NetworkInterfaceExample {
     public static void main(String[] args) {
         try {
             InetAddress address = InetAddress.getByName("192.168.0.13");
-            //NetworkInterface networkInterface = NetworkInterface.getByInetAddress(address);
+            NetworkInterface networkInterface = NetworkInterface.getByInetAddress(address);
             //NetworkInterface networkInterface = NetworkInterface.getByName("eth3");
-            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-            while(networkInterfaces.hasMoreElements())
-            {
-                NetworkInterface networkInterface = networkInterfaces.nextElement();
+//            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+//            while(networkInterfaces.hasMoreElements())
+//            {
+                //NetworkInterface networkInterface = networkInterfaces.nextElement();
                 if(networkInterface != null) {
                     System.out.println("NIC name: " + networkInterface.getName());
                     System.out.println("NIC display name: " + networkInterface.getDisplayName());
@@ -47,7 +47,7 @@ public class NetworkInterfaceExample {
                 {
                     System.out.println("Interface not found");
                 }
-            }
+            //}
         } catch (UnknownHostException | SocketException e) {
             e.printStackTrace();
         }

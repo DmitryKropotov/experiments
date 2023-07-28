@@ -16,8 +16,8 @@ public class URLExample {
         */
         URL url = new URL("https://www.google.com/");
         URLConnection myURL = url.openConnection();
-        InputStream inputStream = myURL.getInputStream();
-        InputStreamReader inputStreamReader = new InputStreamReader(myURL.getInputStream());
+//        InputStream inputStream = myURL.getInputStream();
+//        InputStreamReader inputStreamReader = new InputStreamReader(myURL.getInputStream());
         BufferedReader in = new BufferedReader(new InputStreamReader(myURL.getInputStream()));
         String inputLine;
         String pattern = "<span id=\"yfs_l84_orcl\">(.+?)</span>";

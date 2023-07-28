@@ -11,32 +11,32 @@ import java.net.UnknownHostException;
 public class Ping {
 
     public static void main(String[] args) {
-        //BufferedReader inputStream = null;
+        BufferedReader inputStream = null;
         try {
-            InetAddress host = InetAddress.getByName("google.com");
+            InetAddress host = InetAddress.getByName("192.168.0.13");
             System.out.println(host.isReachable(1000));
 
-//            Process p = Runtime.getRuntime().exec("port " + host);
-//            inputStream = new BufferedReader(new InputStreamReader(p.getInputStream()));
-//
-//            String commandOutput = "";
-//            while ((commandOutput = inputStream.readLine()) != null) {
-//                System.out.println(commandOutput);
-//                if(commandOutput.contains("Destination host unreachable")) {
-//                    break;
-//                }
-//            }
+            Process p = Runtime.getRuntime().exec("ping " + host.getHostName());
+            inputStream = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+            String commandOutput = "";
+            while ((commandOutput = inputStream.readLine()) != null) {
+                System.out.println(commandOutput);
+                if(commandOutput.contains("Destination host unreachable")) {
+                    break;
+                }
+            }
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        } //finally {
-//            try {
-//                inputStream.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
+        }  finally {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         InetAddressValidator inetAddressValidator = new InetAddressValidator();
         System.out.println(inetAddressValidator.isValid("128.0.0.4"));

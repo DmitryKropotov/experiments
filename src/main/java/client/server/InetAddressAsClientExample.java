@@ -13,11 +13,11 @@ public class InetAddressAsClientExample {
     public static void main(String[] args) throws UnknownHostException {
         InetAddress inetAddress = InetAddress.getLocalHost();
         System.out.println(inetAddress.getHostName());
-        System.out.println(inetAddress.getAddress());
+        ptintAddress(inetAddress.getAddress());
         System.out.println(inetAddress.getHostAddress());
         InetAddress inetAddress2 = InetAddress.getByName("google.com");
         System.out.println(inetAddress2.getHostName());
-        System.out.println(inetAddress2.getAddress());
+        ptintAddress(inetAddress2.getAddress());
         System.out.println(inetAddress2.getHostAddress());
 
         try {
@@ -33,5 +33,13 @@ public class InetAddressAsClientExample {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void ptintAddress(byte[] address) {
+        for (byte b : address) {
+            System.out.print(b + ".");
+        }
+        System.out.println("");
+
     }
 }
