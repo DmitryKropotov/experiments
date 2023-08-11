@@ -9,6 +9,7 @@ import java.net.Socket;
 
 public class SingleServerThread {
 
+    //telnet localhost 9090 - connect a client to localhost:9090
     public static void main(String[] args) {
 	// write your code here
         int port = 90;
