@@ -19,6 +19,7 @@ public class UDPClient {
             sendData = stringSendData.getBytes();
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddress, 9090);
             clientSocket.send(sendPacket);
+
             DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
             clientSocket.receive(receivePacket);
             receiveData = receivePacket.getData();
