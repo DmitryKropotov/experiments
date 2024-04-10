@@ -7,26 +7,38 @@ import java.util.Scanner;
 public class ConnectionInstaller extends Thread {
 
     private int portNumber;
+    private int partnerPort;
+    private Socket[] socket;
     private Scanner sc = new Scanner(System.in);
 
-    public ConnectionInstaller(int portNumber) {
+    private final int CLIENT_LIMIT = 5;
+
+    public ConnectionInstaller(int portNumber, int partnerPort, Socket[] socket) {
         this.portNumber = portNumber;
+        this.partnerPort = partnerPort;
+        this.socket = socket;
     }
 
     @Override
     public void run() {
-        String partnerPort;
-        do {
-            System.out.println("Your port number is " + portNumber + ". Print number of port you want to connect");
-            partnerPort = sc.next();
-        } while (!partnerPort.matches("[1-9][0-9]*"));
-        Socket socket = null;
+        Socket newSocket = null;
         try {
-            socket = new Socket("localhost", Integer.parseInt(partnerPort));
-            MyPrintWriter out = new MyPrintWriter(socket.getOutputStream(), true);
-            MyBufferedReader input = new MyBufferedReader(new InputStreamReader(socket.getInputStream()));
+            newSocket = new Socket("localhost", partnerPort);
+            int i = 0;
+            while (true) {
+                if(socket[i] == null || !socket[i].isConnected()) {
+                    socket[i] = newSocket;
+                    break;
+                }
+                i++;
+                if(i>=CLIENT_LIMIT) {
+                    i=0;
+                }
+            }
+            MyPrintWriter out = new MyPrintWriter(newSocket.getOutputStream(), true);
+            MyBufferedReader input = new MyBufferedReader(new InputStreamReader(newSocket.getInputStream()));
             new Reader(input).start();
-            new Writer(out, portNumber, Integer.parseInt(partnerPort)).start();
+            new Writer(out, portNumber, partnerPort).start();
             while(!input.connectionClosed && !out.connectionClosed) {
                 try {
                     Thread.sleep(10000);
@@ -38,7 +50,7 @@ public class ConnectionInstaller extends Thread {
             throw new RuntimeException(e);
         } finally {
             try {
-                socket.close();
+                newSocket.close();
             } catch (IOException e) {
                 System.out.println(e);
             }
