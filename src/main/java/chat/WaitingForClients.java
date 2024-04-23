@@ -1,20 +1,32 @@
 package chat;
 
+import org.apache.commons.collections.set.ListOrderedSet;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 public class WaitingForClients extends Thread {
 
     private int portNumber;
-    private Socket[] socket;
-    private int CLIENT_LIMIT = 5;
-    int connectedClients = 0;
+    private Map<Integer, Socket> allSockets;
+    private Map<Integer, Socket> currentSockets;
+    ListOrderedSet partnerPorts;
+    private final int CLIENT_LIMIT;
 
-    public WaitingForClients(int portNumber, Socket[] socket) {
+    private Map<Socket, InputOut> socketInputOut = new HashMap<>();
+
+    public WaitingForClients(int portNumber, Map<Integer, Socket> allSockets, Map<Integer, Socket> currentSockets,
+                             ListOrderedSet partnerPorts, final int CLIENT_LIMIT) {
         this.portNumber = portNumber;
-        this.socket = socket;
+        this.allSockets = allSockets;
+        this.currentSockets = currentSockets;
+        this.partnerPorts = partnerPorts;
+        this.CLIENT_LIMIT = CLIENT_LIMIT;
     }
 
     @Override
@@ -24,27 +36,54 @@ public class WaitingForClients extends Thread {
             MyPrintWriter out = null;
             MyBufferedReader input = null;
             while(true) {
-                Socket currentSocket = null;
-                while(currentSocket == null) {
+                Socket currentSocket = scannerSocket.accept();//connection accepted
+                if(currentSocket != null) {
                     for (int i = 0; i < CLIENT_LIMIT; i++) {
-                        if(socket[i] == null || !socket[i].isConnected()) {
-                            socket[i] = scannerSocket.accept();
-                            currentSocket = socket[i];
+                        if(allSockets.get(i) == null) {
+                            allSockets.put(currentSocket.getPort(), currentSocket);
+                            currentSockets.put(currentSocket.getPort(), currentSocket);
+                            partnerPorts.add(currentSocket.getPort());
+                            break;
+                        } else if(!allSockets.get(i).isConnected()) {
+                            Socket oldSocket = allSockets.get(i);
+                            oldSocket.bind(new InetSocketAddress(currentSocket.getPort()));
+                            currentSocket = oldSocket;
+                            partnerPorts.add(currentSocket.getPort());
+                            break;
                         }
                     }
                 }
-                new WaitingForClosingClients(out, input, currentSocket).start();
-                connectedClients++;
-                System.out.println("socket is created");
-                out = new MyPrintWriter(currentSocket.getOutputStream(), true);
-                input = new MyBufferedReader(new InputStreamReader(currentSocket.getInputStream()));
+                out = new MyPrintWriter(currentSocket.getOutputStream(), false);
+                input = new MyBufferedReader(new InputStreamReader(currentSocket.getInputStream()), false);
+                new WaitingForClosingClients(out, input, currentSocket, currentSockets).start();
                 new Reader(input).start();
                 new Writer(out, portNumber, currentSocket.getLocalPort()).start();
-                System.out.println("Client2 before while");
-                System.out.println("Client2 after while");
+                socketInputOut.put(currentSocket, new InputOut(input, out));
+
+                currentSockets.entrySet().forEach(portSocket -> {
+                    InputOut inputOut = socketInputOut.get(portSocket.getValue());
+                    if(inputOut.input.connectionClosed || inputOut.out.connectionClosed) {
+                        try {
+                            portSocket.getValue().close();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        currentSockets.remove(portSocket.getKey());
+                    }
+                });
             }
         } catch (IOException e) {
             System.out.println(e);
+        }
+    }
+
+    private class InputOut {
+        MyBufferedReader input;
+        MyPrintWriter out;
+
+        public InputOut(MyBufferedReader input, MyPrintWriter out) {
+            this.out = out;
+            this.input = input;
         }
     }
 }

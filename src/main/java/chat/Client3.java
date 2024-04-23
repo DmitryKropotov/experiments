@@ -1,14 +1,20 @@
 package chat;
 
+import org.apache.commons.collections.set.ListOrderedSet;
+
 import java.io.IOException;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Client3 {
     public static void main(String[] args) throws IOException {
         int portNumber = 70;
         final int CLIENT_LIMIT = 5;
-        Socket[] socket = new Socket[CLIENT_LIMIT];
-        new AskingForClients(portNumber, socket).start();
-        new WaitingForClients(portNumber, socket).start();
+        Map<Integer, Socket> allSockets= new HashMap();
+        Map<Integer, Socket> currentSockets= new HashMap();
+        ListOrderedSet partnerPorts = new ListOrderedSet();
+        new AskingForClients(portNumber, allSockets, currentSockets, partnerPorts, CLIENT_LIMIT).start();
+        new WaitingForClients(portNumber, allSockets, currentSockets, partnerPorts, CLIENT_LIMIT).start();
     }
 }

@@ -2,17 +2,20 @@ package chat;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Map;
 
 public class WaitingForClosingClients extends Thread {
 
     private MyPrintWriter out;
     private MyBufferedReader input;
     private Socket socket;
+    private Map<Integer, Socket> currentSockets;
 
-    public WaitingForClosingClients(MyPrintWriter out, MyBufferedReader input, Socket socket) {
+    public WaitingForClosingClients(MyPrintWriter out, MyBufferedReader input, Socket socket, Map<Integer, Socket> currentSockets) {
         this.out = out;
         this.input = input;
         this.socket = socket;
+        this.currentSockets = currentSockets;
     }
 
     @Override
@@ -25,10 +28,13 @@ public class WaitingForClosingClients extends Thread {
             }
             System.out.println("Connection is closed " + input.connectionClosed + " " + out.connectionClosed);
         }
-        try {
-            socket.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if(socket != null) {
+            try {
+                socket.close();
+                currentSockets.remove(socket.getPort());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

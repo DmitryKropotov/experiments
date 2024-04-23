@@ -1,33 +1,49 @@
 package chat;
 
+import org.apache.commons.collections.set.ListOrderedSet;
+
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Scanner;
+import java.util.Map;
 
 public class ConnectionInstaller extends Thread {
 
     private int portNumber;
     private int partnerPort;
-    private Socket[] socket;
-    private Scanner sc = new Scanner(System.in);
+    private final int CLIENT_LIMIT;
+    private Map<Integer, Socket> allSockets;
+    private Map<Integer, Socket> currentSockets;
+    private ListOrderedSet partnerPorts;
 
-    private final int CLIENT_LIMIT = 5;
-
-    public ConnectionInstaller(int portNumber, int partnerPort, Socket[] socket) {
+    public ConnectionInstaller(int portNumber, int partnerPort, Map<Integer, Socket> allSockets, Map<Integer, Socket> currentSockets,
+                               ListOrderedSet partnerPorts, final int CLIENT_LIMIT) {
         this.portNumber = portNumber;
         this.partnerPort = partnerPort;
-        this.socket = socket;
+        this.allSockets = allSockets;
+        this.currentSockets = currentSockets;
+        this.partnerPorts = partnerPorts;
+        this.CLIENT_LIMIT = CLIENT_LIMIT;
     }
 
     @Override
     public void run() {
         Socket newSocket = null;
+        int indexOfNewSocket = 0;
         try {
-            newSocket = new Socket("localhost", partnerPort);
+            newSocket = new Socket("localhost", partnerPort);//connection installed
             int i = 0;
             while (true) {
-                if(socket[i] == null || !socket[i].isConnected()) {
-                    socket[i] = newSocket;
+                if(allSockets.get(i) == null) {
+                    allSockets.put(i, newSocket);
+                    currentSockets.put(i, newSocket);
+                    partnerPorts.add(partnerPort);
+                    break;
+                } else if(!allSockets.get(i).isConnected()) {
+                    Socket oldSocket = allSockets.get(i);
+                    oldSocket.bind(new InetSocketAddress(partnerPort));
+                    newSocket = oldSocket;
+                    partnerPorts.add(partnerPort);
                     break;
                 }
                 i++;
@@ -35,8 +51,10 @@ public class ConnectionInstaller extends Thread {
                     i=0;
                 }
             }
+            currentSockets.put(i, newSocket);
+            indexOfNewSocket = i;
             MyPrintWriter out = new MyPrintWriter(newSocket.getOutputStream(), true);
-            MyBufferedReader input = new MyBufferedReader(new InputStreamReader(newSocket.getInputStream()));
+            MyBufferedReader input = new MyBufferedReader(new InputStreamReader(newSocket.getInputStream()), false);
             new Reader(input).start();
             new Writer(out, portNumber, partnerPort).start();
             while(!input.connectionClosed && !out.connectionClosed) {
@@ -46,13 +64,16 @@ public class ConnectionInstaller extends Thread {
                     throw new RuntimeException(e);
                 }
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            System.out.println("Connection with " + partnerPort + " failed " + e);
         } finally {
-            try {
-                newSocket.close();
-            } catch (IOException e) {
-                System.out.println(e);
+            if(newSocket != null) {
+                try {
+                    newSocket.close();
+                    currentSockets.remove(indexOfNewSocket);
+                } catch (IOException e) {
+                    System.out.println(e);
+                }
             }
         }
     }
