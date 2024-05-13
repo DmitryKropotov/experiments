@@ -5,7 +5,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class Writer extends Thread {
+public class Writer {
     private MyPrintWriter out;
     private int myPortNumber;
     private int partnerPort;
@@ -18,33 +18,34 @@ public class Writer extends Thread {
         this.partnerPort = partnerPort;
     }
 
-    @Override
-    public void run() {
+    public void write() {
         while (true) {
-            ObjectOutputStream os = null;
-            try {
-                Socket s = new Socket("localhost", partnerPort);
+            //ObjectOutputStream os = null;
+            //try {
+                //Socket s = new Socket("localhost", partnerPort);
                 while(true) {
-                    os = new ObjectOutputStream(s.getOutputStream());
+                    //os = new ObjectOutputStream(s.getOutputStream());
                     String outputMessage = sc.next();
+                    System.out.println("A message has been read from console for chat " + outputMessage);
                     out.println(outputMessage);
+                    System.out.println("The message has been sent " + outputMessage);
                     if (outputMessage.equals("bye")) {
                         System.out.println("bye is here");
                         out.connectionClosed = true;
                         break;
                     }
                 }
-            } catch (IOException e) {
-                System.out.println(e);
-            } finally {
-                if (os != null) {
-                    try {
-                        os.close();
-                    } catch (IOException e) {
-                        System.out.println(e);
-                    }
-                }
-            }
+//            } catch (IOException e) {
+//                System.out.println(e);
+//            } finally {
+//                if (os != null) {
+//                    try {
+//                        os.close();
+//                    } catch (IOException e) {
+//                        System.out.println(e);
+//                    }
+//                }
+//            }
         }
     }
 }

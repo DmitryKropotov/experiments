@@ -3,6 +3,7 @@ package chat;
 import org.apache.commons.collections.set.ListOrderedSet;
 
 import java.io.*;
+import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Map;
@@ -31,7 +32,10 @@ public class ConnectionInstaller extends Thread {
         Socket newSocket = null;
         int indexOfNewSocket = 0;
         try {
-            newSocket = new Socket("localhost", partnerPort);//connection installed
+            newSocket = new Socket("127.0.0.1", partnerPort);
+//            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+//            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//           newSocket = new Socket("localhost", partnerPort, Inet4Address.getByName("localhost"), portNumber);//connection installed
             int i = 0;
             while (true) {
                 if(allSockets.get(i) == null) {
@@ -56,25 +60,25 @@ public class ConnectionInstaller extends Thread {
             MyPrintWriter out = new MyPrintWriter(newSocket.getOutputStream(), true);
             MyBufferedReader input = new MyBufferedReader(new InputStreamReader(newSocket.getInputStream()), false);
             new Reader(input).start();
-            new Writer(out, portNumber, partnerPort).start();
-            while(!input.connectionClosed && !out.connectionClosed) {
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            //new Writer(out, portNumber, partnerPort).start();
+//            while(!input.connectionClosed && !out.connectionClosed) {
+//                try {
+//                    Thread.sleep(10000);
+//                } catch (InterruptedException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
         } catch (IOException e) {
             System.out.println("Connection with " + partnerPort + " failed " + e);
         } finally {
-            if(newSocket != null) {
-                try {
-                    newSocket.close();
-                    currentSockets.remove(indexOfNewSocket);
-                } catch (IOException e) {
-                    System.out.println(e);
-                }
-            }
+//            if(newSocket != null) {
+//                try {
+//                    newSocket.close();
+//                    currentSockets.remove(indexOfNewSocket);
+//                } catch (IOException e) {
+//                    System.out.println(e);
+//                }
+//            }
         }
     }
 }

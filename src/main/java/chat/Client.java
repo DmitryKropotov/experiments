@@ -9,12 +9,13 @@ import java.util.Map;
 
 public class Client {
     public static void main(String[] args) throws IOException {
-        int portNumber = 90;
+        int portNumber = 70;
         final int CLIENT_LIMIT = 5;
         Map<Integer, Socket> allSockets= new HashMap();
         Map<Integer, Socket> currentSockets= new HashMap();
+        Map<Integer, Socket> socketsPartnerPort= new HashMap();
         ListOrderedSet partnerPorts = new ListOrderedSet();
-        new AskingForClients(portNumber, allSockets, currentSockets, partnerPorts, CLIENT_LIMIT).start();
+        new AskingForClients(portNumber, allSockets, currentSockets, socketsPartnerPort, partnerPorts, CLIENT_LIMIT).start();
         new WaitingForClients(portNumber, allSockets, currentSockets, partnerPorts, CLIENT_LIMIT).start();
     }
 }

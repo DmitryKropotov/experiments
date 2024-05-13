@@ -35,7 +35,7 @@ public class WaitingForClients extends Thread {
             ServerSocket scannerSocket = new ServerSocket(portNumber);
             MyPrintWriter out = null;
             MyBufferedReader input = null;
-            while(true) {
+            //while(true) {
                 Socket currentSocket = scannerSocket.accept();//connection accepted
                 if(currentSocket != null) {
                     for (int i = 0; i < CLIENT_LIMIT; i++) {
@@ -55,23 +55,23 @@ public class WaitingForClients extends Thread {
                 }
                 out = new MyPrintWriter(currentSocket.getOutputStream(), false);
                 input = new MyBufferedReader(new InputStreamReader(currentSocket.getInputStream()), false);
-                new WaitingForClosingClients(out, input, currentSocket, currentSockets).start();
+                // new WaitingForClosingClients(out, input, currentSocket, currentSockets).start();
                 new Reader(input).start();
-                new Writer(out, portNumber, currentSocket.getLocalPort()).start();
-                socketInputOut.put(currentSocket, new InputOut(input, out));
-
-                currentSockets.entrySet().forEach(portSocket -> {
-                    InputOut inputOut = socketInputOut.get(portSocket.getValue());
-                    if(inputOut.input.connectionClosed || inputOut.out.connectionClosed) {
-                        try {
-                            portSocket.getValue().close();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                        currentSockets.remove(portSocket.getKey());
-                    }
-                });
-            }
+                //new Writer(out, portNumber, currentSocket.getLocalPort()).start();
+//                socketInputOut.put(currentSocket, new InputOut(input, out));
+//
+//                currentSockets.entrySet().forEach(portSocket -> {
+//                    InputOut inputOut = socketInputOut.get(portSocket.getValue());
+//                    if(inputOut.input.connectionClosed || inputOut.out.connectionClosed) {
+//                        try {
+//                            portSocket.getValue().close();
+//                        } catch (IOException e) {
+//                            throw new RuntimeException(e);
+//                        }
+//                        currentSockets.remove(portSocket.getKey());
+//                    }
+//                });
+            //}
         } catch (IOException e) {
             System.out.println(e);
         }

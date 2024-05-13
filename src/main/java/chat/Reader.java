@@ -12,19 +12,20 @@ public class Reader extends Thread {
     @Override
     public void run() {
         while (true) {
-            try {
-                String inputMessage = null;
-                do {
+            String inputMessage = null;
+            do {
+                try {
+                    System.out.println("A message is going to be read");
                     inputMessage = input.readLine();
-                } while(!input.connectionClosed && inputMessage == null);
-                if (inputMessage.equals("bye")) {
-                    System.out.println("bye is here");
-                    break;
-                }
-                System.out.println(inputMessage);
-            } catch (IOException e) {
-                System.out.println(e);
+                    System.out.println("A message is read. It is " + inputMessage);
+                } catch (IOException ignored) {}
+            } while(!input.connectionClosed && inputMessage == null);
+            System.out.println("Reader after first while");
+            if (inputMessage.equals("bye")) {
+                System.out.println("bye is here");
+                break;
             }
+            System.out.println(inputMessage);
         }
         input.connectionClosed = true;
     }
