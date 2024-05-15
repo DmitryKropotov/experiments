@@ -15,14 +15,11 @@ public class Reader extends Thread {
             String inputMessage = null;
             do {
                 try {
-                    System.out.println("A message is going to be read");
                     inputMessage = input.readLine();
-                    System.out.println("A message is read. It is " + inputMessage);
+                    System.out.println(inputMessage);
                 } catch (IOException ignored) {}
-            } while(!input.connectionClosed && inputMessage == null);
-            System.out.println("Reader after first while");
+            } while(!input.connectionClosed && (inputMessage == null || !inputMessage.equals("bye")));
             if (inputMessage.equals("bye")) {
-                System.out.println("bye is here");
                 break;
             }
             System.out.println(inputMessage);

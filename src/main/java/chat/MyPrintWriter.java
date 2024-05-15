@@ -7,7 +7,7 @@ public class MyPrintWriter extends PrintWriter {
     public boolean connectionClosed = false;
 
     public MyPrintWriter(OutputStream out, boolean connectionClosed) {
-        super(out);
+        super(out, true);
         this.connectionClosed = connectionClosed;
     }
 }

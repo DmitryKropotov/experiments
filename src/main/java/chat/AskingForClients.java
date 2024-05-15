@@ -67,7 +67,7 @@ public class AskingForClients extends Thread {
         while(true) {
             StringBuilder menu = new StringBuilder("0 - return to main menu");
             for (int i = 0; i < partnerPorts.size(); i++) {
-                menu.append(" " + (i + 1) + " - open chat with client on port " + partnerPorts.get(i));
+                menu.append(" " + partnerPorts.get(i) + " - open chat with client on port " + partnerPorts.get(i));
             }
             System.out.println(menu);
             String partnerPort = sc.next();
@@ -83,8 +83,8 @@ public class AskingForClients extends Thread {
                             System.out.println(e);
                             continue;
                         }
-                        openChatWithClient(allSockets.get(portNumber), Integer.parseInt(partnerPort));
                     }
+                    openChatWithClient(allSockets.get(Integer.parseInt(partnerPort)), Integer.parseInt(partnerPort));
                 } else {
                     System.out.println("there is no chat with " + clientPort);
                 }
@@ -119,10 +119,8 @@ public class AskingForClients extends Thread {
             }
             currentSockets.put(i, newSocket);
             indexOfNewSocket = i;
-            MyPrintWriter out = new MyPrintWriter(newSocket.getOutputStream(), true);
             MyBufferedReader input = new MyBufferedReader(new InputStreamReader(newSocket.getInputStream()), false);
             new Reader(input).start();
-            //new Writer(out, portNumber, partnerPort).start();
 //            while(!input.connectionClosed && !out.connectionClosed) {
 //                try {
 //                    Thread.sleep(10000);
@@ -147,7 +145,7 @@ public class AskingForClients extends Thread {
     private void openChatWithClient(Socket socket, int partnerPort) {
         MyPrintWriter out = null;
         try {
-            out = new MyPrintWriter(socket.getOutputStream(), true);
+            out = new MyPrintWriter(socket.getOutputStream(), false);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
