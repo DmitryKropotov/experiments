@@ -9,23 +9,28 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class WaitingForClients extends Thread {
 
     private int portNumber;
     private Map<Integer, Socket> allSockets;
-    private Map<Integer, Socket> currentSockets;
-    ListOrderedSet partnerPorts;
+//    private Map<Integer, Socket> currentSockets;
+//    Map<Integer, Socket> socketsPartnerPort;
+//    Map<Socket, AtomicBoolean> socketAtomicBooleanMap;
+//    ListOrderedSet partnerPorts;
     private final int CLIENT_LIMIT;
 
     private Map<Socket, InputOut> socketInputOut = new HashMap<>();
 
     public WaitingForClients(int portNumber, Map<Integer, Socket> allSockets, Map<Integer, Socket> currentSockets,
-                             ListOrderedSet partnerPorts, final int CLIENT_LIMIT) {
+                             Map<Integer, Socket> socketsPartnerPort,  Map<Socket, AtomicBoolean> socketAtomicBooleanMap, ListOrderedSet partnerPorts, final int CLIENT_LIMIT) {
         this.portNumber = portNumber;
         this.allSockets = allSockets;
-        this.currentSockets = currentSockets;
-        this.partnerPorts = partnerPorts;
+//        this.currentSockets = currentSockets;
+//        this.socketsPartnerPort = socketsPartnerPort;
+//        this.socketAtomicBooleanMap = socketAtomicBooleanMap;
+//        this.partnerPorts = partnerPorts;
         this.CLIENT_LIMIT = CLIENT_LIMIT;
     }
 
@@ -35,34 +40,36 @@ public class WaitingForClients extends Thread {
             ServerSocket scannerSocket = new ServerSocket(portNumber);
             MyPrintWriter out = null;
             MyBufferedReader input = null;
-            //while(true) {
+            while(true) {
                 Socket currentSocket = scannerSocket.accept();//connection accepted
-                if(currentSocket != null) {
-                    for (int i = 0; i < CLIENT_LIMIT; i++) {
-                        if(allSockets.get(i) == null) {
-                            allSockets.put(currentSocket.getPort(), currentSocket);
-                            currentSockets.put(currentSocket.getPort(), currentSocket);
-                            partnerPorts.add(currentSocket.getPort());
-                            break;
-                        } else if(!allSockets.get(i).isConnected()) {
-                            Socket oldSocket = allSockets.get(i);
-                            oldSocket.bind(new InetSocketAddress(currentSocket.getPort()));
-                            currentSocket = oldSocket;
-                            partnerPorts.add(currentSocket.getPort());
-                            break;
-                        }
-                    }
+                if (currentSocket != null) {
+//                    for (int i = 0; i < CLIENT_LIMIT; i++) {
+//                        if(allSockets.get(i) == null) {
+                    allSockets.put(currentSocket.getPort(), currentSocket);
+//                            currentSockets.put(currentSocket.getPort(), currentSocket);
+//                            partnerPorts.add(currentSocket.getPort());
+//                            break;
+//                        } else if(!allSockets.get(i).isConnected()) {
+//                            Socket oldSocket = allSockets.get(i);
+//                            oldSocket.bind(new InetSocketAddress(currentSocket.getPort()));
+//                            currentSocket = oldSocket;
+//                            partnerPorts.add(currentSocket.getPort());
+//                            break;
+//                        }
+                    //}
+                    AtomicBoolean connectionClosed = new AtomicBoolean(false);
+//                    out = new MyPrintWriter(currentSocket.getOutputStream(), connectionClosed);
+                    input = new MyBufferedReader(new InputStreamReader(currentSocket.getInputStream()), connectionClosed);
+                    // new WaitingForClosingClients(out, input, currentSocket, currentSockets).start();
+                    new Reader(input).start();
+//                    new Writer(out, portNumber, currentSocket.getLocalPort()).start();
                 }
-                out = new MyPrintWriter(currentSocket.getOutputStream(), false);
-                input = new MyBufferedReader(new InputStreamReader(currentSocket.getInputStream()), false);
-                // new WaitingForClosingClients(out, input, currentSocket, currentSockets).start();
-                new Reader(input).start();
-                //new Writer(out, portNumber, currentSocket.getLocalPort()).start();
+            }
 //                socketInputOut.put(currentSocket, new InputOut(input, out));
 //
 //                currentSockets.entrySet().forEach(portSocket -> {
 //                    InputOut inputOut = socketInputOut.get(portSocket.getValue());
-//                    if(inputOut.input.connectionClosed || inputOut.out.connectionClosed) {
+//                    if(inputOut.input.connectionClosed.get() || inputOut.out.connectionClosed.get()) {
 //                        try {
 //                            portSocket.getValue().close();
 //                        } catch (IOException e) {
@@ -71,7 +78,7 @@ public class WaitingForClients extends Thread {
 //                        currentSockets.remove(portSocket.getKey());
 //                    }
 //                });
-            //}
+//            }
         } catch (IOException e) {
             System.out.println(e);
         }

@@ -1,6 +1,7 @@
 package chat;
 
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Writer {
     private MyPrintWriter out;
@@ -20,7 +21,7 @@ public class Writer {
                String outputMessage = sc.next();
                out.println(outputMessage);
                if (outputMessage.equals("bye")) {
-                   out.connectionClosed = true;
+                   //out.connectionClosed = new AtomicBoolean(true);
                    break;
                }
           }

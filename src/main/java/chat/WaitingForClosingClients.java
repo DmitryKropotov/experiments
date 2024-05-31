@@ -20,7 +20,7 @@ public class WaitingForClosingClients extends Thread {
 
     @Override
     public void run() {
-        while(!input.connectionClosed && !out.connectionClosed) {
+        while(!input.connectionClosed.get() && !out.connectionClosed.get()) {
             try {
                 Thread.sleep(10000);
             } catch (InterruptedException e) {

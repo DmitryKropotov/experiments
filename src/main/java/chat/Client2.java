@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Client2 {
     public static void main(String[] args) throws IOException {
@@ -14,8 +15,9 @@ public class Client2 {
         Map<Integer, Socket> allSockets= new HashMap();
         Map<Integer, Socket> currentSockets= new HashMap();
         Map<Integer, Socket> socketsPartnerPort= new HashMap();
+        Map<Socket, AtomicBoolean> socketAtomicBooleanMap = new HashMap();
         ListOrderedSet partnerPorts = new ListOrderedSet();
-        new AskingForClients(portNumber, allSockets, currentSockets, socketsPartnerPort, partnerPorts, CLIENT_LIMIT).start();
-        new WaitingForClients(portNumber, allSockets, currentSockets, partnerPorts, CLIENT_LIMIT).start();
+        new AskingForClients(portNumber, allSockets, currentSockets, socketsPartnerPort, socketAtomicBooleanMap, partnerPorts, CLIENT_LIMIT).start();
+        new WaitingForClients(portNumber, allSockets, currentSockets, socketsPartnerPort, socketAtomicBooleanMap, partnerPorts, CLIENT_LIMIT).start();
     }
 }

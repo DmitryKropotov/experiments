@@ -1,6 +1,7 @@
 package chat;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Reader extends Thread {
     private MyBufferedReader input;
@@ -11,6 +12,7 @@ public class Reader extends Thread {
 
     @Override
     public void run() {
+        System.out.println("run in Reader started");
         while (true) {
             String inputMessage = null;
             do {
@@ -18,12 +20,9 @@ public class Reader extends Thread {
                     inputMessage = input.readLine();
                     System.out.println(inputMessage);
                 } catch (IOException ignored) {}
-            } while(!input.connectionClosed && (inputMessage == null || !inputMessage.equals("bye")));
-            if (inputMessage.equals("bye")) {
-                break;
-            }
-            System.out.println(inputMessage);
+            } while(!input.connectionClosed.get() && (inputMessage == null || !inputMessage.equals("bye")));
         }
-        input.connectionClosed = true;
+//        input.connectionClosed = new AtomicBoolean(true);
+//        System.out.println("run in Reader finished");
     }
 }
