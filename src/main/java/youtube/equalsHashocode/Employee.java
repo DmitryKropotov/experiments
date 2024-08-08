@@ -19,69 +19,31 @@ public class Employee {
         return position;
     }
 
-    public void setPosition(String position) {
-        this.position = position;
-    }
-
     public int getAge() {
         return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getSurname() {
         return surname;
     }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Employee)) return false;
+
+        Employee employee = (Employee) o;
+        return age == employee.age && Objects.equals(position, employee.position);
     }
 
-
-
-
-
-    //    @Override
-//    public final boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (!(o instanceof Employer)) return false;
-//
-//        Employer employer = (Employer) o;
-//        return age == employer.age && Objects.equals(name, employer.name) && Objects.equals(surname, employer.surname);
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        int result = age;
-//        result = 31 * result + Objects.hashCode(name);
-//        result = 31 * result + Objects.hashCode(surname);
-//        return result;
-//    }
-
-//    @Override
-//    public boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (o == null || getClass() != o.getClass()) return false;
-//
-//        Employee employer = (Employee) o;
-//        return age == employer.age && Objects.equals(name, employer.name) && Objects.equals(surname, employer.surname);
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        int result = age;
-//        result = 31 * result + Objects.hashCode(name);
-//        result = 31 * result + Objects.hashCode(surname);
-//        return result;
-//    }
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(position);
+        result = 31 * result + age;
+        return result;
+    }
 }

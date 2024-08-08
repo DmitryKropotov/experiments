@@ -19,18 +19,23 @@ public class WaitingForClients extends Thread {
 //    Map<Integer, Socket> socketsPartnerPort;
 //    Map<Socket, AtomicBoolean> socketAtomicBooleanMap;
 //    ListOrderedSet partnerPorts;
+    private Map<Socket, AtomicBoolean> chatWithClientsOpened;
+    private Map<Socket, AtomicBoolean> connectionWithClientsClosed;
     private final int CLIENT_LIMIT;
 
     private Map<Socket, InputOut> socketInputOut = new HashMap<>();
 
     public WaitingForClients(int portNumber, Map<Integer, Socket> allSockets, Map<Integer, Socket> currentSockets,
-                             Map<Integer, Socket> socketsPartnerPort,  Map<Socket, AtomicBoolean> socketAtomicBooleanMap, ListOrderedSet partnerPorts, final int CLIENT_LIMIT) {
+                             Map<Integer, Socket> socketsPartnerPort,  Map<Socket, AtomicBoolean> socketAtomicBooleanMap, ListOrderedSet partnerPorts,
+                             Map<Socket, AtomicBoolean> chatWithClientsOpened, Map<Socket, AtomicBoolean> connectionWithClientsClosed, final int CLIENT_LIMIT) {
         this.portNumber = portNumber;
         this.allSockets = allSockets;
 //        this.currentSockets = currentSockets;
 //        this.socketsPartnerPort = socketsPartnerPort;
 //        this.socketAtomicBooleanMap = socketAtomicBooleanMap;
 //        this.partnerPorts = partnerPorts;
+        this.chatWithClientsOpened = chatWithClientsOpened;
+        this.connectionWithClientsClosed = connectionWithClientsClosed;
         this.CLIENT_LIMIT = CLIENT_LIMIT;
     }
 
@@ -57,9 +62,12 @@ public class WaitingForClients extends Thread {
 //                            break;
 //                        }
                     //}
+                    AtomicBoolean chatOpened = new AtomicBoolean(false);
                     AtomicBoolean connectionClosed = new AtomicBoolean(false);
+                    chatWithClientsOpened.put(currentSocket, chatOpened);
+                    connectionWithClientsClosed.put(currentSocket, connectionClosed);
 //                    out = new MyPrintWriter(currentSocket.getOutputStream(), connectionClosed);
-                    input = new MyBufferedReader(new InputStreamReader(currentSocket.getInputStream()), connectionClosed);
+                    input = new MyBufferedReader(new InputStreamReader(currentSocket.getInputStream()), chatOpened, connectionClosed);
                     // new WaitingForClosingClients(out, input, currentSocket, currentSockets).start();
                     new Reader(input).start();
 //                    new Writer(out, portNumber, currentSocket.getLocalPort()).start();

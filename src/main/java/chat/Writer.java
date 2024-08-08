@@ -17,13 +17,16 @@ public class Writer {
     }
 
     public void write() {
-          while(true) {
+        System.out.println("chat is going to be opened in writer " + out.chatOpened);
+        out.chatOpened = new AtomicBoolean(true);
+        System.out.println("chat is opened in writer " + out.chatOpened);
+        while(true) {
                String outputMessage = sc.next();
                out.println(outputMessage);
                if (outputMessage.equals("bye")) {
-                   //out.connectionClosed = new AtomicBoolean(true);
+                   out.chatOpened = new AtomicBoolean(false);
                    break;
                }
-          }
+        }
     }
 }

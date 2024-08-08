@@ -2,20 +2,21 @@ package youtube.recursion;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(calculateFactorial(3, 1));
+        System.out.println(calculateFactorial(3));
         System.out.println(maleHofstader(6));
         System.out.println(femaleHofstader(6));
     }
 
-    private static int calculateFactorial(int n, int a) {
+    private static int calculateFactorial(int n) {
         if(n<0) {
             return n;
         } else if(n==0 || n==1) {
-            return 1*a;
+            return 1;
+            //return a;
         } else {
-//           int x = calculateFactorial(n-1);
-//           return x*n;
-           return calculateFactorial(n-1, a*n);
+           int x = calculateFactorial(n-1);
+           return x*n;
+           //return calculateFactorial(n-1, a*n);
         }
     }
 

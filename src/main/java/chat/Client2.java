@@ -17,7 +17,12 @@ public class Client2 {
         Map<Integer, Socket> socketsPartnerPort= new HashMap();
         Map<Socket, AtomicBoolean> socketAtomicBooleanMap = new HashMap();
         ListOrderedSet partnerPorts = new ListOrderedSet();
-        new AskingForClients(portNumber, allSockets, currentSockets, socketsPartnerPort, socketAtomicBooleanMap, partnerPorts, CLIENT_LIMIT).start();
-        new WaitingForClients(portNumber, allSockets, currentSockets, socketsPartnerPort, socketAtomicBooleanMap, partnerPorts, CLIENT_LIMIT).start();
+
+        Map<Socket, AtomicBoolean> chatWithClientsOpened = new HashMap<>();
+        Map<Socket, AtomicBoolean> connectionWithClientsClosed = new HashMap<>();
+        new AskingForClients(portNumber, allSockets, currentSockets, socketsPartnerPort, socketAtomicBooleanMap, partnerPorts,
+                chatWithClientsOpened, connectionWithClientsClosed, CLIENT_LIMIT).start();
+        new WaitingForClients(portNumber, allSockets, currentSockets, socketsPartnerPort, socketAtomicBooleanMap, partnerPorts,
+                chatWithClientsOpened, connectionWithClientsClosed, CLIENT_LIMIT).start();
     }
 }

@@ -17,18 +17,23 @@ public class AskingForClients extends Thread {
 //    private Map<Integer, Socket> currentSockets;//amount is limited by CLIENT_LIMIT
 //    Map<Integer, Socket> socketsPartnerPort;
 //    Map<Socket, AtomicBoolean> socketAtomicBooleanMap;
+    private Map<Socket, AtomicBoolean> chatWithClientsOpened;
+    private Map<Socket, AtomicBoolean> connectionWithClientsClosed;
     private final int CLIENT_LIMIT;
     private Scanner sc = new Scanner(System.in);
     private ListOrderedSet partnerPorts;
 
     public AskingForClients(int portNumber, Map<Integer, Socket> allSockets, Map<Integer, Socket> currentSockets,
-                            Map<Integer, Socket> socketsPartnerPort, Map<Socket, AtomicBoolean> socketAtomicBooleanMap, ListOrderedSet partnerPorts, final int CLIENT_LIMIT) {
+                            Map<Integer, Socket> socketsPartnerPort, Map<Socket, AtomicBoolean> socketAtomicBooleanMap, ListOrderedSet partnerPorts,
+                            Map<Socket, AtomicBoolean> chatWithClientsOpened, Map<Socket, AtomicBoolean> connectionWithClientsClosed, final int CLIENT_LIMIT) {
         this.portNumber = portNumber;
         this.allSockets = allSockets;
  //       this.currentSockets = currentSockets;
 //        this.socketsPartnerPort = socketsPartnerPort;
 //        this.socketAtomicBooleanMap = socketAtomicBooleanMap;
         this.partnerPorts = partnerPorts;
+        this.chatWithClientsOpened = chatWithClientsOpened;
+        this.connectionWithClientsClosed = connectionWithClientsClosed;
         this.CLIENT_LIMIT = CLIENT_LIMIT;
     }
 
@@ -54,14 +59,15 @@ public class AskingForClients extends Thread {
             if (partnerPort.equals("back")) {
                 return;
             } else if (partnerPort.matches("[1-9][0-9]*")) {
+                AtomicBoolean chatOpened = new AtomicBoolean(false);
                 AtomicBoolean connectionClosed = new AtomicBoolean(false);
                 try {
-                    installConnection(Integer.parseInt(partnerPort), connectionClosed);
+                    installConnection(Integer.parseInt(partnerPort), chatOpened, connectionClosed);
                 } catch (IOException e) {
                     System.out.println(e);
                     return;
                 }
-                openChatWithClient(allSockets.get(Integer.parseInt(partnerPort)), Integer.parseInt(partnerPort), connectionClosed);
+                openChatWithClient(allSockets.get(Integer.parseInt(partnerPort)), Integer.parseInt(partnerPort), chatOpened, connectionClosed);
                 return;
             }
         }
@@ -80,7 +86,9 @@ public class AskingForClients extends Thread {
             } else if (partnerPort.matches("[1-9][0-9]*")) {
                 int clientPort = Integer.parseInt(partnerPort);
                 if (allSockets.containsKey(clientPort)) {
-                    AtomicBoolean connectionClosed = new AtomicBoolean(false);
+                    Socket socket = allSockets.get(Integer.parseInt(partnerPort));
+                    AtomicBoolean chatOpened = chatWithClientsOpened.get(socket);
+                    AtomicBoolean connectionClosed =connectionWithClientsClosed.get(socket);
 //                    if (!currentSockets.containsKey(clientPort)) {
 //                        try {
 //                            installConnection(Integer.parseInt(partnerPort), connectionClosed);
@@ -89,18 +97,20 @@ public class AskingForClients extends Thread {
 //                            continue;
 //                        }
 //                    }
-                    openChatWithClient(allSockets.get(Integer.parseInt(partnerPort)), Integer.parseInt(partnerPort), connectionClosed);
-            } else {
+                    openChatWithClient(allSockets.get(Integer.parseInt(partnerPort)), Integer.parseInt(partnerPort), chatOpened, connectionClosed);
+                } else {
                     System.out.println("there is no chat with " + clientPort);
-            }
+                }
             }
         }
     }
 
-    private void installConnection(int partnerPort, AtomicBoolean connectionClosed) throws IOException {
+    private void installConnection(int partnerPort, AtomicBoolean chatOpened , AtomicBoolean connectionClosed) throws IOException {
         Socket newSocket = null;
         int indexOfNewSocket = 0;
         newSocket = new Socket("127.0.0.1", partnerPort);
+        chatWithClientsOpened.put(newSocket, chatOpened);
+        connectionWithClientsClosed.put(newSocket, connectionClosed);
         //socketAtomicBooleanMap.put(newSocket, connectionClosed);
 //        int i = 0;
 //            while (true) {
@@ -126,7 +136,7 @@ public class AskingForClients extends Thread {
 //            currentSockets.put(i, newSocket);
             //indexOfNewSocket = i;
         allSockets.put(partnerPort, newSocket);
-            MyBufferedReader input = new MyBufferedReader(new InputStreamReader(newSocket.getInputStream()), connectionClosed);
+            MyBufferedReader input = new MyBufferedReader(new InputStreamReader(newSocket.getInputStream()), chatOpened, connectionClosed);
             new Reader(input).start();
 //            while(!input.connectionClosed && !out.connectionClosed) {
 //                try {
@@ -149,10 +159,10 @@ public class AskingForClients extends Thread {
 //        }
     }
 
-    private void openChatWithClient(Socket socket, int partnerPort, AtomicBoolean connectionClosed) {
+    private void openChatWithClient(Socket socket, int partnerPort, AtomicBoolean chatOpened, AtomicBoolean connectionClosed) {
         MyPrintWriter out = null;
         try {
-            out = new MyPrintWriter(socket.getOutputStream(), connectionClosed);
+            out = new MyPrintWriter(socket.getOutputStream(), chatOpened, connectionClosed);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

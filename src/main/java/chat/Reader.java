@@ -1,10 +1,12 @@
 package chat;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Reader extends Thread {
     private MyBufferedReader input;
+    private List<String> bufferedMessages = new ArrayList();
 
     public Reader(MyBufferedReader input) {
         this.input = input;
@@ -17,12 +19,19 @@ public class Reader extends Thread {
             String inputMessage = null;
             do {
                 try {
+                    if(!bufferedMessages.isEmpty() && input.chatOpened.get()) {
+                        bufferedMessages.forEach(System.out::println);
+                    }
                     inputMessage = input.readLine();
-                    System.out.println(inputMessage);
+                    if(!input.chatOpened.get()) {
+                        bufferedMessages.add(inputMessage);
+                    } else {
+                        System.out.println(inputMessage);
+                    }
                 } catch (IOException ignored) {}
             } while(!input.connectionClosed.get() && (inputMessage == null || !inputMessage.equals("bye")));
+            System.out.println("while in Reader ended iteration");
         }
 //        input.connectionClosed = new AtomicBoolean(true);
-//        System.out.println("run in Reader finished");
     }
 }
