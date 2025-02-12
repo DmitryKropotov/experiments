@@ -9,3 +9,9 @@ spring:
       server:
         git:
           uri: https://github.com/your-repo/config-repo
+  stream:
+    bindings:
+      enrichLogMessage-in-0:
+        destination: queue.log.messages
+      enrichLogMessage-out-0:
+        destination: queue.pretty.log.messages
